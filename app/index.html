@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Line</title>
+
+        <!-- build:css styles/main.css -->
+        <link rel="stylesheet" href="styles/style.css">
+        <!-- endbuild -->
+    </head>
+    <body>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.js"></script>
+        <script src="bower_components/d3/d3.js"></script>
+        <script src="bower_components/jquery/dist/jquery.js"></script>
+        <script src="scripts/sample_data.js"></script>
+
+        <div id="main">
+          <div id="sequence"></div>
+          <div id="chart"></div>
+        </div>
+<!--         <div id="sidebar">
+          <input type="checkbox" id="togglelegend"> Legend<br/>
+          <div id="legend" style="visibility: hidden;"></div>
+        </div>
+        <button id="update">Update</button>
+ -->    </body>
+<script>
+
+// Converts data
+var tree = {name: 'all', children: []}
+sampleData.report.items.forEach(function(d) {
+    d.subjects.forEach(function (s,i) {
+        var current = tree.children;
+        s.forEach(function (e,j) {
+            var node = _.find(current, function(n) {
+                return n.name == e;
+            });
+
+            var next;
+
+            if(node) {
+                next = node
+            } else if (j == s.length - 1) {
+                next = { name: e, views: d.viewed }
+            } else {
+                next = { name: e, children: []}
+            }
+
+            if(next !== node) {
+                if(current == undefined) current = [];
+                current.push(next)
+            }
+
+            current = next.children
+        })
+    });
+})
+
+var width = 1200,
+    height = 700,
+    radius = Math.min(width, height) / 2 - 20;
+
+// Breadcrumb dimensions: width, height, spacing, width of tip/tail.
+var b = {
+  w: 195, h: 30, s: 3, t: 10
+};
+
+</script>
+<!-- build:js(app) scripts/sunburst_chart.js -->
+<script src="bower_components/d3-tip/index.js"></script>
+<script src="scripts/sunburst_chart.js"></script>
+<!-- endbuild -->
+</html>
