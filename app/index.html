@@ -4,26 +4,24 @@
         <meta charset="utf-8">
         <title>Line</title>
 
-        <!-- build:css styles/main.css -->
+
         <link rel="stylesheet" href="styles/style.css">
-        <!-- endbuild -->
+
     </head>
     <body>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.js"></script>
-        <script src="bower_components/d3/d3.js"></script>
-        <script src="bower_components/jquery/dist/jquery.js"></script>
-        <script src="scripts/sample_data.js"></script>
-
+        <!-- build:js(app) scripts/deps.js -->
+            <script src="bower_components/lodash/dist/lodash.js"></script>
+            <script src="bower_components/d3/d3.js"></script>
+            <script src="bower_components/d3-tip/index.js"></script>
+            <script src="bower_components/jquery/dist/jquery.js"></script>
+        <!-- endbuild -->
         <div id="main">
           <div id="sequence"></div>
           <div id="chart"></div>
         </div>
-<!--         <div id="sidebar">
-          <input type="checkbox" id="togglelegend"> Legend<br/>
-          <div id="legend" style="visibility: hidden;"></div>
-        </div>
-        <button id="update">Update</button>
- -->    </body>
+    </body>
+    <script src="scripts/sample_data.js"></script>
+
 <script>
 
 // Converts data
@@ -66,8 +64,5 @@ var b = {
 };
 
 </script>
-<!-- build:js(app) scripts/sunburst_chart.js -->
-<script src="bower_components/d3-tip/index.js"></script>
-<script src="scripts/sunburst_chart.js"></script>
-<!-- endbuild -->
+    <script src="scripts/sunburst_chart.js"></script>
 </html>
