@@ -73,7 +73,7 @@ gulp.task('usemin', function () {
 //Concatenate and Minify JS task
 gulp.task('scripts', function() {
   return gulp.src('./app/scripts/*.js')
-    .pipe(uglify())
+    // .pipe(uglify())
     .pipe(gulp.dest('./dist/scripts'))
     .pipe(notify({ message: 'Scripts task complete' }));
 });
