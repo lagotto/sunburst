@@ -53,9 +53,9 @@ SunburstChart.prototype._draw = function () {
     d3.select("#container").on("mouseleave", mouseleave);
 
     // Keep track of the node that is currently being displayed as the root.
-    var node = tree;
+    var node = this.data;
 
-    var path = svg.datum(tree)
+    var path = svg.datum(this.data)
         .selectAll("path")
         .data(partition.nodes)
         .enter()
