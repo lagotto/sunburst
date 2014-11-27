@@ -3,6 +3,7 @@ var SunburstChart = function() {
 };
 
 SunburstChart.prototype.create = function(el, properties, data) {
+    this.el = el;
     this.svg = d3.select(el).append('svg')
         .attr('class', 'd3')
         .attr('width', properties.width)
@@ -111,14 +112,14 @@ SunburstChart.prototype._draw = function () {
     function mouseleave(d) {
 
         // Hide the breadcrumb trail
-        d3.select("#trail")
+        svg.select("#trail")
           .style("visibility", "hidden");
 
         // Deactivate all segments during transition.
-        d3.selectAll("path").on("mouseover", null);
+        svg.selectAll("path").on("mouseover", null);
 
         // Transition each segment to full opacity and then reactivate it.
-        d3.selectAll("path")
+        svg.selectAll("path")
             .transition()
             .duration(200)
             .style("opacity", 1)
@@ -267,7 +268,7 @@ SunburstChart.prototype._draw = function () {
     d3.select("#togglelegend").on("click", toggleLegend);
 
     // Add the mouseleave handler to the bounding circle.
-    d3.select("#container").on("mouseleave", mouseleave);
+    d3.select(this.el).select("#container").on("mouseleave", mouseleave);
 
     // Keep track of the node that is currently being displayed as the root.
     var node = this.data;
