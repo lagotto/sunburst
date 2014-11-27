@@ -44,59 +44,6 @@ SunburstChart.prototype._draw = function () {
         .innerRadius(function(d) { return Math.max(0, y(d.y)); })
         .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
-    // Basic setup of page elements.
-    initializeBreadcrumbTrail.bind(this)();
-    drawLegend();
-    d3.select("#togglelegend").on("click", toggleLegend);
-
-    // Add the mouseleave handler to the bounding circle.
-    d3.select("#container").on("mouseleave", mouseleave);
-
-    // Keep track of the node that is currently being displayed as the root.
-    var node = this.data;
-
-    var path = svg.datum(this.data)
-        .selectAll("path")
-        .data(partition.nodes)
-        .enter()
-        .append("path")
-            .attr("d", arc)
-            .style("fill", function(d) {
-                if(!d.depth) {
-                    return 'transparent'
-                } else {
-                    return color((d.children ? d : d.parent).name);
-                }
-            })
-            .on("click", click)
-            .on("mouseover", mouseover)
-            .each(stash);
-
-    var centerText = svg.append("text")
-        .attr('id', 'centerText')
-        .attr('text-anchor', 'middle')
-        .text('Explore with your mouse');
-
-    d3.selectAll("input").on("change", function change() {
-        var value = this.value === "count"
-            ? function() { return 1; }
-            : function(d) { return d.views; };
-
-        path
-            .data(partition.value(value).nodes)
-            .transition()
-            .attrTween("d", arcTweenData);
-    });
-
-    function click(d) {
-        node = d;
-        path.transition()
-          .duration(1000)
-          .attrTween("d", arcTweenZoom(d));
-    }
-
-    d3.select(self.frameElement).style("height", this.height + "px");
-
     // Setup for switching data: stash the old values for transition.
     function stash(d) {
         d.x0 = d.x;
@@ -115,7 +62,10 @@ SunburstChart.prototype._draw = function () {
         if (i == 0) {
             // If we are on the first arc, adjust the x domain to match the root node
             // at the current zoom level. (We only need to do this once.)
-            var xd = d3.interpolate(x.domain(), [node.x, node.x + node.dx]);
+            var xd = d3.interpolate(x.domain(), [
+                node.x,
+                node.x +
+                node.dx]);
             return function(t) {
               x.domain(xd(t));
               return tween(t);
@@ -126,7 +76,7 @@ SunburstChart.prototype._draw = function () {
     }
 
     // When zooming: interpolate the scales.
-    function arcTweenZoom(d) {
+    var arcTweenZoom = function (d) {
         var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
             yd = d3.interpolate(y.domain(), [d.y, 1]),
             yr = d3.interpolate(y.range(), [d.y ? 90 : 0, this.radius]);
@@ -135,7 +85,7 @@ SunburstChart.prototype._draw = function () {
                 ? function(t) { return arc(d); }
                 : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
         };
-    }
+    }.bind(this);
 
     // Fade all but the current sequence, and show it in the breadcrumb trail.
     function mouseover(d) {
@@ -303,6 +253,60 @@ SunburstChart.prototype._draw = function () {
             legend.style("visibility", "hidden");
         }
     }
+
+    var click = function (d) {
+        node = d;
+        path.transition()
+          .duration(1000)
+          .attrTween("d", arcTweenZoom(d));
+    }.bind(this);
+
+    // Basic setup of page elements.
+    initializeBreadcrumbTrail.bind(this)();
+    drawLegend();
+    d3.select("#togglelegend").on("click", toggleLegend);
+
+    // Add the mouseleave handler to the bounding circle.
+    d3.select("#container").on("mouseleave", mouseleave);
+
+    // Keep track of the node that is currently being displayed as the root.
+    var node = this.data;
+
+    var path = svg.datum(this.data)
+        .selectAll("path")
+        .data(partition.nodes)
+        .enter()
+        .append("path")
+            .attr("d", arc)
+            .style("fill", function(d) {
+                if(!d.depth) {
+                    return 'transparent'
+                } else {
+                    return color((d.children ? d : d.parent).name);
+                }
+            })
+            .on("click", click)
+            .on("mouseover", mouseover)
+            .each(stash);
+
+    var centerText = svg.append("text")
+        .attr('id', 'centerText')
+        .attr('text-anchor', 'middle')
+        .text('Explore with your mouse');
+
+    d3.selectAll("input").on("change", function change() {
+        var value = this.value === "count"
+            ? function() { return 1; }
+            : function(d) { return d.views; };
+
+        path
+            .data(partition.value(value).nodes)
+            .transition()
+            .attrTween("d", arcTweenData);
+    });
+
+    d3.select(self.frameElement).style("height", this.height + "px");
+
 
 }
 
