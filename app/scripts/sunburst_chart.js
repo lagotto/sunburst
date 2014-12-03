@@ -112,7 +112,7 @@ SunburstChart.prototype._draw = function () {
     function mouseleave(d) {
 
         // Hide the breadcrumb trail
-        svg.select("#trail")
+        d3.select("#sequence").select("#trail")
           .style("visibility", "hidden");
 
         // Deactivate all segments during transition.
