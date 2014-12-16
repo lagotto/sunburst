@@ -36,7 +36,7 @@ SunburstChart.prototype._draw = function () {
     var partitioned = partition(this.data);
 
     var color = d3.scale.linear()
-        .range(["hsl(222,30%,20%)", "hsl(62,100%,90%)"])
+        .range(["hsl(228,30%,20%)","hsl(62,100%,90%)"])
         .domain(d3.extent(partitioned.slice(1,-1), function (d) {
             return d.citations
         }))
