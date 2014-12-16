@@ -35,10 +35,16 @@ sampleData.report.items.forEach(function(d) {
 
             if(node) {
                 next = node
+                if(next.citations) {
+                   next.citations = next.citations + d.cited;
+                } else {
+                   next.citations = d.cited;
+                }
+
             } else if (j == s.length - 1) {
-                next = { name: e, views: d.viewed }
+                next = { name: e, views: d.viewed, citations: d.cited }
             } else {
-                next = { name: e, children: []}
+                next = { name: e, children: [], citations: d.cited }
             }
 
             if(next !== node) {
@@ -50,13 +56,16 @@ sampleData.report.items.forEach(function(d) {
         })
     });
 })
+tree.citations = _.reduce(tree.children, function(sum, subject) {
+    return sum + subject.citations;
+}, 0);
 
 var sunburst = new SunburstChart;
 
 sunburst.create($('#chart')[0], {
     width: 1200,
-    height: 700,
-    radius: 700 / 2 - 20,
+    height: 900,
+    radius: 900 / 2 - 50,
     breadcrumb: {
         // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
         width: 195,

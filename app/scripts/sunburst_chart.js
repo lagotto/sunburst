@@ -29,15 +29,22 @@ SunburstChart.prototype._draw = function () {
     var y = d3.scale.sqrt()
         .range([0, this.radius]);
 
-    var color = d3.scale.category20c();
+    var partition = d3.layout.partition()
+        .sort(null)
+        .value(function(d) { return d.views; });
+
+    var partitioned = partition(this.data);
+
+    var color = d3.scale.linear()
+        .range(["hsl(222,30%,20%)", "hsl(62,100%,90%)"])
+        .domain(d3.extent(partitioned.slice(1,-1), function (d) {
+            return d.citations
+        }))
+        .interpolate(d3.interpolateHcl)
 
     var svg = this.svg.append("g")
         .attr("id", "container")
         .attr("transform", "translate(" + this.width / 2 + "," + (this.height / 2 + 10) + ")");
-
-    var partition = d3.layout.partition()
-        .sort(null)
-        .value(function(d) { return d.views; });
 
     var arc = d3.svg.arc()
         .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
@@ -91,8 +98,9 @@ SunburstChart.prototype._draw = function () {
     // Fade all but the current sequence, and show it in the breadcrumb trail.
     function mouseover(d) {
         centerText.text('');
-        centerText.append('tspan').text(d.value + ' views')
-        centerText.append('tspan').attr('x', 0).attr('dy', '15')
+        centerText.append('tspan').text(d3.format(',')(d.value) + ' views, ')
+        centerText.append('tspan').text(d3.format(',')(d.citations) + ' citations')
+        centerText.append('tspan').attr('x', 0).attr('dy', '1.6em')
             .text(d.name);
 
         var sequenceArray = getAncestors(d);
@@ -181,15 +189,23 @@ SunburstChart.prototype._draw = function () {
         var entering = g.enter().append("svg:g");
 
         entering.append("svg:polygon")
-            .attr("points", breadcrumbPoints)
-            .style("fill", function(d) { return color((d.children ? d : d.parent).name); });
+            .attr('points', breadcrumbPoints)
+            .style('fill', function(d) { return color((d.children ? d : d.parent).citations); });
 
-        entering.append("svg:text")
-            .attr("x", (b.width + b.tip) / 2)
-            .attr("y", b.height / 2)
-            .attr("dy", "0.35em")
-            .attr("text-anchor", "middle")
-            .text(function(d) { return d.name; });
+        entering.append('svg:text')
+            .attr('x', (b.width + b.tip) / 2)
+            .attr('y', b.height / 2)
+            .attr('dy', '0.35em')
+            .attr('text-anchor', 'middle')
+            .text(function(d) { return d.name; })
+            .style('fill', function (d) {
+                hsl = d3.hsl(color(d.citations));
+                if(hsl.l > 0.5) {
+                    return "#000000"
+                } else {
+                    return "#ffffff"
+                }
+            });
 
         // Set position for entering and updating nodes.
         g.attr("transform", function(d, i) {
@@ -205,7 +221,7 @@ SunburstChart.prototype._draw = function () {
             .attr("y", b.height / 2)
             .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
-            .text(value + ' views');
+            .text(d3.format(',')(value) + ' views');
 
         // Make the breadcrumb trail visible, if it's hidden.
         d3.select("#trail")
@@ -273,9 +289,8 @@ SunburstChart.prototype._draw = function () {
     // Keep track of the node that is currently being displayed as the root.
     var node = this.data;
 
-    var path = svg.datum(this.data)
-        .selectAll("path")
-        .data(partition.nodes)
+    var path = svg.selectAll("path")
+        .data(partitioned)
         .enter()
         .append("path")
             .attr("d", arc)
@@ -283,7 +298,7 @@ SunburstChart.prototype._draw = function () {
                 if(!d.depth) {
                     return 'transparent'
                 } else {
-                    return color((d.children ? d : d.parent).name);
+                    return color(d.citations);
                 }
             })
             .on("click", click)
